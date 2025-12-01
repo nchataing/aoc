@@ -1,11 +1,11 @@
-        global main
-        extern printf
+        global _start
+        extern print_unsigned
 
         section .data
 format: db "%ld", 10, 0
 
         section .text
-main:
+_start:
         ; allocate 1MB and read input from stdin
         mov rax, 12         ; brk
         xor rdi, rdi
@@ -84,12 +84,8 @@ continue_loop:
 
 done:
         ; call printf to output result in r15
-        mov rdi, format
-        mov rsi, r15
-        xor rax, rax
-        push rax        ; align stack before calling printf
-        call printf
-        add rsp, 8
+        mov rdi, r15
+        call print_unsigned
 
         ; exit 0
         mov rax, 60
