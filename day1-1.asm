@@ -1,9 +1,6 @@
         global _start
         extern print_unsigned
 
-        section .data
-format: db "%ld", 10, 0
-
         section .text
 _start:
         ; allocate 1MB and read input from stdin
@@ -31,42 +28,42 @@ _start:
         ; - r8 will store the direction (-1 for L, 1 for R)
         ; - r9 will store the number to turn
 
-read_instruction:
+.read_instruction:
         ; instruction format: [L|R][number] [L|R][number] ...
         mov al, [r12+r13]       ; read current character
         inc r13                 ; move to next character
         cmp al, 0               ; check for \0 (end of input)
-        je done                 ; if newline, we're done
+        je .done                 ; if newline, we're done
         cmp al, 'L'             ; check if turn left or right, store result in rdx
-        je turn_left
+        je .turn_left
         cmp al, 'R'
-        je turn_right
+        je .turn_right
 
         ; invalid input, exit 1
         mov rax, 60
         mov rdi, 1
         syscall
 
-turn_left:
+.turn_left:
         mov rdx, -1
-        jmp read_number
-turn_right:
+        jmp .read_number
+.turn_right:
         mov rdx, 1
 
-read_number:
+.read_number:
         xor rbx, rbx            ; clear rbx to store number
-loop_digit:
+.loop_digit:
         xor rax, rax
         mov al, [r12+r13]
         inc r13                 ; move to next character
         cmp al, 10              ; check for line break (end of number)
-        je apply_turn
+        je .apply_turn
         sub al, '0'             ; convert char to digit
         imul rbx, rbx, 10
         add rbx, rax            ; accumulate number
-        jmp loop_digit
+        jmp .loop_digit
 
-apply_turn:
+.apply_turn:
         imul rdx, rbx           ; rdx = direction * number
         add r14, rdx            ; update current dial number
 
@@ -76,13 +73,13 @@ apply_turn:
         mov rcx, 100
         idiv rcx                 ; rax = r14 / 100, rdx = r14 % 100
         cmp rdx, 0
-        jne continue_loop
+        jne .continue_loop
         inc r15                 ; increment count if dial points to 0
 
-continue_loop:
-        jmp read_instruction
+.continue_loop:
+        jmp .read_instruction
 
-done:
+.done:
         ; call printf to output result in r15
         mov rdi, r15
         call print_unsigned
