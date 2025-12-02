@@ -1,11 +1,11 @@
 ; IMPORTANT: the input was preprocessed to have range of numbers that have the
 ; same length in base 10
 
-        global main
+        global _start
         extern print_unsigned
 
         section .text
-main:
+_start:
 
         ; r12 = base address of input
         ; r13 = current index in input
@@ -71,8 +71,8 @@ main:
 .loop_interval:
         cmp r8, r9
         jg .read_first      ; continue with next input interval
-        ; check if rcx is a hit
 
+        ; check if r8 is a hit
         mov rdi, r8
         mov rsi, r10
         call check_hit      ; r15 will be incremented in the call if hit
@@ -91,38 +91,57 @@ main:
 ; @in rdi <- number to check
 ; @in rsi <- length of number in base 10
 check_hit:
-    mov r14, rdi
-    ; check if length is even
-    mov rax, rsi
-    and rax, 1
-    test rax, rax
-    jne .end
-
-    ; cut rdi in half digits
-    mov rax, rsi
-    shr rax, 1
-    mov rdi, rax    ; rdi = half length
-    call pow10      ; rax = 10 ^ (length/2)
-    mov rbx, rax    ; rbx = 10
-    mov rax, r14    ; restore number to rax
+    ; iterate on exponent from 1 to length / 2
+    mov r11, rsi
+    mov rbx, rsi
+    shr rbx, 1          ; rbx = length / 2
+    mov rcx, 0          ; counter
+    mov rsi, 1          ; 10 ^ counter
+.loop:
+    inc rcx
+    imul rsi, rsi, 10
+    cmp rcx, rbx
+    jg .end
+    ; test divisibility of original number length by current counter
+    mov rax, r11
     mov rdx, 0
-    div rbx         ; rax = first half, rdx = second half
-    cmp rax, rdx
-    jne .end
-    add r15, r14    ; rax == rdx, it's a hit, increment result
+    div rcx
+    cmp rdx, 0
+    jne .loop
+    ; call subroutine
+    push rbx
+    push rcx
+    call test_exponent
+    pop rcx
+    pop rbx
+    cmp rax, 1
+    je .hit
+    jmp .loop
+.hit:
+    add r15, rdi
 .end:
     ret
 
-; @in rdi <- exponent
-; @out rax -> 10 ^ exponent
-pow10:
-        mov rax, 1
-        mov rbx, 10
-.pow10_loop:
-        cmp rdi, 0
-        je .pow10_done
-        imul rax, rbx
-        dec rdi
-        jmp .pow10_loop
-.pow10_done:
-        ret
+; @in rdi <- number to test
+; @in rsi <- 10 ^ some exponent
+test_exponent:
+    mov rax, rdi
+    mov rdx, 0
+    ; do first division outside the loop to store the target sub-string
+    div rsi
+    mov r14, rdx    ; r14 = target sub-string, subsequent reminders must match this
+.next:
+    cmp rax, 0
+    je .hit
+    mov rdx, 0
+    div rsi
+    cmp rdx, r14
+    jne .no_hit
+    jmp .next
+
+.hit:
+    mov rax, 1
+    ret
+.no_hit:
+    mov rax, 0
+    ret
