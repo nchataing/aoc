@@ -15,6 +15,12 @@
     syscall
 %endmacro
 
+%macro RDTSCP 0
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+%endmacro
+
         section .text
 _start:
 
@@ -42,6 +48,8 @@ _start:
         syscall
         mov byte [r12+rax], 0 ; null terminate input
 
+        RDTSCP
+        mov r11, rax
 
 .handle_bank:
         ; bank joltage in r14
@@ -82,6 +90,9 @@ _start:
         jmp .handle_bank
 
 .done:
+        RDTSCP
+        sub rax, r11        ; cycles elapsed
+        PRINT rax
         PRINT r15
         EXIT 0
 
