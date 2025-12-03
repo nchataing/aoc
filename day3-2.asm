@@ -1,4 +1,4 @@
-        global main
+        global _start
         extern print_unsigned
 
 %define LINE_LENGTH 100         ; change constant depending on test input vs final input
@@ -16,7 +16,7 @@
 %endmacro
 
         section .text
-main:
+_start:
 
         ; r15 = result
         ; for each input line :
@@ -98,7 +98,6 @@ find_largest_digit_in_range:
         jge .find_done
         mov rbx, 0
         mov bl, [r12+rcx]
-.break_here
         cmp rbx, rax
         cmovg rax, rbx
         cmovg r8, rcx

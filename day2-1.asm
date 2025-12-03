@@ -1,8 +1,8 @@
-        global main
+        global _start
         extern print_unsigned
 
         section .text
-main:
+_start:
         ; r12 = base address of input
         ; r13 = current index in input
         ; r15 = result
