@@ -7,6 +7,12 @@ global print_unsigned
 
 ; rdi is the number to print, followed by a line break
 print_unsigned:
+    push rdx
+    push r8
+    push r9
+    push r10
+    push r11
+
     ; Check if the number is zero
     cmp rdi, 0
     jne .convert_number
@@ -21,7 +27,7 @@ print_unsigned:
     mov rsi, buffer
     mov rdx, 2
     syscall
-    ret
+    jmp .ret
 
 .convert_number:
     mov byte [buffer + 31], 10   ; newline character at the end of the buffer
@@ -45,4 +51,11 @@ print_unsigned:
     mov rdx, buffer + 32
     sub rdx, rsi
     syscall
+
+.ret:
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rdx
     ret
