@@ -1,10 +1,12 @@
+%define LEN 10
+
         global _start
         extern print_unsigned
         extern sort
         extern shuffle
 
         section .data
-array:  times 1000 dq 0
+array:  times LEN dq 0
 
         section .text
 _start:
@@ -13,12 +15,13 @@ _start:
 .init_loop:
         mov [array + rcx*8], rcx
         inc rcx
-        cmp rcx, 1000
+        cmp rcx, LEN
         jne .init_loop
 
         mov rdi, array
-        mov rsi, 1000
+        mov rsi, LEN
         call shuffle
+        lea rdx, [rel cmp]
         call sort
 
         xor rax, rax
@@ -28,7 +31,7 @@ _start:
         call print_unsigned
         pop rax
         inc rax
-        cmp rax, 1000
+        cmp rax, LEN
         jne .print_loop
 
         ; exit 0
@@ -36,3 +39,7 @@ _start:
         xor rdi, rdi
         syscall
 
+cmp:
+    mov rax, rdi
+    sub rax, rsi
+    ret
