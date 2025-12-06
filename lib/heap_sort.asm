@@ -50,7 +50,7 @@ sort:
     jz .inserted
     mov rdx, rcx
     dec rdx
-    shr rdx, 1                      ; parent index = current index / 2
+    shr rdx, 1                      ; parent index = (current index - 1) / 2
     mov rsi, qword [PTR + rdx*8]    ; parent value
     call CMP_PTR
     cmp rax, 0
