@@ -44,9 +44,3 @@ join:
         mov qword [rdi + rax], 0    ; size of root2 = 0
         mov rax, rdx                ; return new size
 .a:     ret
-
-; rdi: pointer to union find array
-; rsi: size of array
-; rax: returns number of disjoint sets
-count:
-
