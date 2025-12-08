@@ -1,33 +1,30 @@
-section .bss
+        global print_unsigned
+        global read_stdin
+        global read_unsigned
+
+        extern alloc
+
+        section .bss
 buffer resb 32
 
-section .text
-
-global print_unsigned
-global read_stdin
-global read_unsigned
+        section .text
 
 ; allocate 1MB stack space to read input buffer
 ; return pointer in rax, length in rdx
 read_stdin:
-        mov rax, 12                     ; brk
-        xor rdi, rdi
-        syscall
-        mov rbx, rax                    ; base address
-
-        mov rdi, rax
-        add rdi, 1024*1024              ; 1MB
-        mov rax, 12
-        syscall
-
-        mov rax, 0                      ; read
+        mov rdi, 1024*1024              ; 1MB
+        sub rsp, 8                      ; align stack
+        call alloc                      ; allocate buffer
+        add rsp, 8                      ; restore stack
+        mov r8, rax                     ; save base pointer
+        mov rax, 0                      ; read syscall
         mov rdi, 0                      ; stdin
-        mov rsi, rbx                    ; buffer
+        mov rsi, r8                     ; buffer to read into
         mov rdx, 1024*1024              ; max size to read
         syscall                         ;
-        mov byte [rbx+rax], 0           ; null terminate input
+        mov byte [rbx+rax], 0           ; make sure length is null-terminated
         mov rdx, rax                    ; length in rdx
-        mov rax, rbx                    ; pointer in rax
+        mov rax, r8                     ; pointer in rax
         ret
 
 ; @in rdi: buffer to read from

@@ -9,6 +9,12 @@
     mov al, [%1 + %2]
 %endmacro
 
+%macro ALIGN 1
+        sub rsp, 8
+        %1
+        add rsp, 8
+%endmacro
+
 %macro PRINT 1
         push rax
         push rcx
