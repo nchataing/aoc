@@ -7,8 +7,12 @@ global bsearch
 ; rdx: array length
 ; rcx: compare function pointer
 
-; return 0 if found, 1 if not found
+; return value if found, -1 if not found
 bsearch:
+        push r8
+        push r9
+        push r10
+        push r11
         test rdx, rdx
         jz .not_found
 
@@ -24,6 +28,7 @@ bsearch:
         mov rsi, qword [r11 + r10*8]
         call rcx
         cmp rax, 0
+        cmove rax, rsi
         je .found
         jl .left
         mov r8, r10     ; value > mid
@@ -32,9 +37,11 @@ bsearch:
 .left:  mov r9, r10     ; value < mid
         dec r9
         jmp .loop
-.found:
-        mov rax, 0
-        ret
 .not_found:
-        mov rax, 1
+        mov rax, -1
+.found:
+        pop r11
+        pop r10
+        pop r9
+        pop r8
         ret
